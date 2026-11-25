@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>PickFocus</title>
+  <link rel="stylesheet" href="hub.css">
+  <link rel="icon" href="icons/icon32.png">
+</head>
+<body>
+<!-- Structure follows the information architecture in 12_앱지도.html: sidebar · toolbar · one role per screen. -->
+<div id="app" class="app">
+  <aside class="side">
+    <div class="side-top"></div>
+    <p class="brand" aria-label="PickFocus"><img class="flower" src="assets/flower.svg" alt=""><img class="wordmark" src="assets/wordmark.svg" alt=""></p>
+    <span class="demo-tag" title="수업용 데모 버전">데모</span>
+    <nav class="nav" aria-label="화면">
+      <button type="button" data-view="now" aria-current="page">지금</button>
+      <button type="button" data-view="history">기록</button>
+      <button type="button" data-view="settings">설정</button>
+    </nav>
+    <button type="button" id="side-status" class="side-status">
+      <span id="side-ext">유튜브 확인 중</span>
+      <span id="side-engine" class="dim"></span>
+    </button>
+  </aside>
+
+  <div class="main">
+    <header class="toolbar">
+      <h1 id="title" class="title">지금</h1>
+      <div class="tools">
+        <button type="button" id="pip-btn" aria-pressed="false" title="꽃 PiP 창 열기">PiP</button>
+        <button type="button" id="end-btn" class="danger" hidden>세션 끝내기</button>
+      </div>
+    </header>
+
+    <!-- 지금 -->
+    <section id="v-now" class="view">
+      <div id="now-idle" class="pane">
+        <p id="ended" class="note" hidden>세션을 끝냈습니다. 유튜브는 목적을 다시 쓸 때까지 열리지 않습니다.</p>
+        <h2 class="ask">지금 무엇을 하려고 하나요?</h2>
+        <form id="purpose-form" autocomplete="off">
+          <input id="purpose" maxlength="200" placeholder="예: 마케팅 과제용 고객 여정지도 사례 찾기" required aria-label="지금 하려는 일">
+          <button type="submit" id="start-btn" disabled>시작</button>
+        </form>
+        <ul id="recent" class="recent" aria-label="최근 목적"></ul>
+        <p id="key-note" class="inline-note" hidden>Gemini API 키가 없어서 목적 문장의 단어로만 거릅니다. <button type="button" id="key-go">키 넣기</button></p>
+        <p id="today-line" class="dim today"></p>
+      </div>
+      <div id="now-session" class="pane" hidden>
+        <p id="lock-band" class="lock-band" hidden></p>
+        <p class="label">지금 목적</p>
+        <p id="s-purpose" class="s-purpose"></p>
+        <p id="s-since" class="dim"></p>
+        <dl class="list">
+          <div><dt>딴짓 (10분)</dt><dd id="s-strikes">0 / 3</dd></div>
+          <div><dt>숨긴 영상</dt><dd id="s-hidden">0개</dd></div>
+          <div><dt>규칙</dt><dd id="s-rule"></dd></div>
+          <div><dt><label for="gray-live">흑백 화면</label></dt><dd><input type="checkbox" id="gray-live" class="switch" role="switch"></dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- 기록 -->
+    <section id="v-history" class="view" hidden>
+      <div class="pane wide">
+        <div class="tiles">
+          <div><span>오늘 집중</span><b id="h-today">0분</b></div>
+          <div><span>이번 주 집중</span><b id="h-week">0분</b></div>
+          <div><span>이번 주 딴짓</span><b id="h-strikes">0번</b></div>
+          <div><span>이번 주 잠금</span><b id="h-locks">0번</b></div>
+        </div>
+        <div class="chart" id="h-chart" aria-label="최근 7일 집중 시간"></div>
+        <table class="sessions">
+          <thead><tr><th>날짜</th><th>목적</th><th>길이</th><th>딴짓</th><th>잠금</th><th>숨긴 영상</th></tr></thead>
+          <tbody id="h-rows"></tbody>
+        </table>
+        <p id="h-empty" class="dim" hidden>아직 기록이 없습니다.</p>
+      </div>
+    </section>
+
+    <!-- 설정 -->
+    <section id="v-settings" class="view" hidden>
+      <div class="pane">
+        <h3 class="group">화면</h3>
+        <div class="set"><label for="gray-default">흑백으로 시작</label><input type="checkbox" id="gray-default" class="switch" role="switch"></div>
+        <h3 class="group">규칙</h3>
+        <div class="set">
+          <span id="rule-label">잠금 방식</span>
+          <div class="seg" role="radiogroup" aria-labelledby="rule-label">
+            <button type="button" role="radio" id="rule-lock" data-v="lock" aria-checked="true">15분 잠금</button>
+            <button type="button" role="radio" id="rule-warn" data-v="warn" aria-checked="false">경고만</button>
+          </div>
+        </div>
+        <div class="set"><span>경고</span><span class="val">딴짓 3번째</span></div>
+        <div class="set"><span>잠금</span><span class="val">4번째 · 15분</span></div>
+        <p id="rule-locked" class="dim small" hidden>세션 중에는 바꿀 수 없습니다.</p>
+        <h3 class="group" id="g-judge">판단</h3>
+        <div class="set"><span>엔진</span><span id="set-engine" class="val"></span></div>
+        <div class="set" id="key-set">
+          <label for="api-key">Gemini API 키</label>
+          <span class="key-row"><input id="api-key" type="password" autocomplete="off" placeholder="AI Studio에서 받은 키"><button type="button" id="key-save" class="ghost">저장</button></span>
+        </div>
+        <p id="key-help" class="dim small">키는 이 브라우저에만 저장됩니다. 무료 키: aistudio.google.com/apikey</p>
+        <div class="set" id="keyword-area"><label for="keywords">관련 단어 (키 없을 때)</label><input id="keywords" class="text" maxlength="200" placeholder="여정지도, journey map"></div>
+        <h3 class="group" id="g-connect">연결</h3>
+        <div class="set"><span>유튜브 탭</span><span id="set-ext" class="val">확인 중</span></div>
+        <h3 class="group">데이터</h3>
+        <div class="set"><span>세션 기록</span><button type="button" id="clear-btn" class="ghost">기록 지우기</button></div>
+        <h3 class="group">정보</h3>
+        <div class="set"><span>버전</span><span id="set-version" class="val"></span></div>
+        <div class="set"><span>데모 안내</span><button type="button" id="demo-open" class="ghost">다시 보기</button></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- First run: what this demo is and is not. -->
+<div id="demo" class="dialog" hidden role="dialog" aria-modal="true" aria-labelledby="demo-title">
+  <div class="dialog-box">
+    <h2 id="demo-title">PickFocus 데모 버전입니다</h2>
+    <p class="dim">수업 시연용으로 Chrome 확장 하나에 담았습니다. 실제 제품과 다른 점:</p>
+    <ul class="limits">
+      <li>Chrome의 유튜브에서만 동작합니다. 실제 제품은 폰 앱에서 기기 전체를 다룹니다.</li>
+      <li>영상 판단은 Gemini Decision 1이 합니다. 사용하는 사람이 몰리면 잠시 판단이 늦어지거나 멈출 수 있습니다.</li>
+      <li>꽃 PiP는 Chrome 창 규칙상 사각 창 안에 뜹니다.</li>
+      <li>확장을 지우거나 끄면 통제도 사라집니다. 지금은 스스로 맡긴 약속에 가깝습니다.</li>
+      <li>기록은 이 브라우저에만 저장되고 어디에도 보내지 않습니다. 판단할 때만 영상 제목과 목적이 Gemini로 갑니다.</li>
+    </ul>
+    <button type="button" id="demo-ok">확인</button>
+  </div>
+</div>
+<script src="pip-flower.js"></script>
+<script src="assets/pip/pip-layers.js"></script>
+<script src="hub.js"></script>
+</body>
+</html>

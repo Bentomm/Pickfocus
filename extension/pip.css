@@ -1,0 +1,28 @@
+/* The flower PiP. Transparent window; only the flower (and a falling petal) is visible. */
+html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; user-select: none; }
+.stage { position: absolute; left: 0; top: 0; width: 128px; height: 144px; cursor: grab; }
+.stage:active { cursor: grabbing; }
+.flower-svg, .layers { position: absolute; inset: 0; width: 100%; height: 100%; }
+.flower-svg #fill { fill: #000000; }
+.flower-svg #outline { fill: #ededeb; }
+.layers img { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.layers img.gone { display: none; }
+/* A strike: one petal drops below the flower and fades. The only motion in the product, once per strike. */
+.layers img.fall { animation: fall 1100ms cubic-bezier(.45, 0, .8, .6) forwards; }
+@keyframes fall { to { transform: translate(var(--dx, 6px), 76px) rotate(var(--rot, 38deg)); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .layers img.fall { animation: none; display: none; } }
+.count { position: absolute; left: 50%; top: 150px; transform: translateX(-50%); margin: 0; padding: 2px 8px; border-radius: 4px; white-space: nowrap;
+  font: 600 12px/1.4 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; font-variant-numeric: tabular-nums;
+  background: #000000; color: #ededeb; border: 1px solid #5a5a57; }
+.count:empty { display: none; }
+/* Lock: the label turns white like the lock screen in Chrome. */
+.lock .count { background: #ffffff; color: #000000; border-color: #ffffff; }
+.lock .flower-svg #fill { fill: #ffffff; }
+.lock .flower-svg #outline { fill: #000000; }
+/* Document PiP window (extension demo): an opaque black window with the flower centered. */
+body.docpip { background: #000000; }
+.docpip .stage { left: 20px; top: 12px; cursor: default; }
+.flower-svg .fill { fill: #000000; }
+.flower-svg .outline { fill: #ededeb; }
+.lock .flower-svg .fill { fill: #ffffff; }
+.lock .flower-svg .outline { fill: #000000; }
